@@ -46,7 +46,7 @@ object AccidentModelGeneration {
 
     val sparkConf = new SparkConf().setMaster("local").setAppName("accident-machine-learning")
 
-		val sc = new SparkContext(sparkConf)
+    val sc = new SparkContext(sparkConf)
 
     val config = new Configuration
 
