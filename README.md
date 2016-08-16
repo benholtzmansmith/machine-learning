@@ -6,6 +6,6 @@ Based on the NYC Car Accident Data, this application uses spark mllib to train a
 
 ```
 Features: Was Car PickUp
-Model Precision: 98% Precision
+Model Precision: 2% Precision
 Model Recall: Haven't calculated it but probably shit
 ```
