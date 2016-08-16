@@ -1,24 +1,23 @@
-package sparkML
+package pipeline
 
 import com.mongodb.DBObject
 import com.mongodb.hadoop.MongoInputFormat
-import play.api.libs.json._
 import com.mongodb.hadoop.util.MongoConfigUtil
+import features.ExctractLabel
+import models.Accident
 import org.apache.hadoop.conf.Configuration
-
-import scala.util.{Failure, Success, Try}
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkConf
 import org.apache.spark.ml.classification.LogisticRegression
-import org.apache.spark.mllib.linalg.SparseVector
 import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
+import org.apache.spark.mllib.linalg.SparseVector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.{SparkConf, SparkContext}
 import org.bson.BSONObject
 import org.bson.types.ObjectId
-import org.joda.time.DateTime
-import sparkML.FeatureGenerators.featureGenerators
+import play.api.libs.json._
+import utils.JsonSerialization
+import features.FeatureGenerators.featureGenerators
+import scala.util.{Failure, Success, Try}
 
 object AccidentFeatureGeneration {
 	def main(args:Array[String]):Unit = {
@@ -53,39 +52,5 @@ object AccidentFeatureGeneration {
   }
 }
 
-case class Accident(date:DateTime, time:Double, vehicleType1:String, numerOfPersonsKilled:Int)
 
-object Accident {
-  implicit val format:Format[Accident] = Json.format[Accident]
-}
 
-object JsonSerialization {
-  def deserialize[T: Reads](dbo: DBObject): JsResult[T] = {
-    val jsonString = dbo.toString
-    Try(Json.fromJson[T](Json.parse(jsonString))) match {
-      case Success(result) => result
-      case Failure(exception: Throwable) => JsError(exception.getMessage)
-    }
-  }
-}
-
-trait FeatureGenerators {
-  def generateFeature(accident: Accident):Double
-}
-object FeatureGenerators {
-  val featureGenerators:Seq[FeatureGenerators] = Seq(WasAtNight)
-}
-
-object WasAtNight extends FeatureGenerators {
-  def generateFeature(accident: Accident): Double = {
-    if (accident.time > 21 || accident.time < 5) 1
-    else 0
-  }
-}
-
-object ExctractLabel {
-  def extract(accident: Accident):Double = {
-    if (accident.numerOfPersonsKilled > 0) 1
-    else 1
-  }
-}
