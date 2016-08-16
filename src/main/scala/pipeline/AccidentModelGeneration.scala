@@ -3,7 +3,7 @@ package pipeline
 import com.mongodb.DBObject
 import com.mongodb.hadoop.MongoInputFormat
 import com.mongodb.hadoop.util.MongoConfigUtil
-import features.ExctractLabel
+import features.{ExctractLabel, FeatureGenerators}
 import features.FeatureGenerators.featureGenerators
 import models.Accident
 import org.apache.hadoop.conf.Configuration
@@ -15,6 +15,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.bson.BSONObject
 import org.bson.types.ObjectId
+import org.scalatest.TestData
 import play.api.libs.json.{JsError, JsSuccess}
 import utils.JsonSerialization
 
@@ -43,7 +44,7 @@ object AccidentModelGeneration {
 
     println("Starting Accident Data Model Learning ")
 
- 		val sparkConf = new SparkConf().setMaster("local").setAppName("accident-machine-learning")
+    val sparkConf = new SparkConf().setMaster("local").setAppName("accident-machine-learning")
 
 		val sc = new SparkContext(sparkConf)
 
@@ -65,12 +66,7 @@ object AccidentModelGeneration {
               None
           }
         } }.
-        map(accident => LabeledPoint(ExctractLabel.extract(accident), {
-          val featureValues = featureGenerators.map(f => f.generateFeature(accident)).toArray
-          val vectorSize = featureGenerators.length
-          val indexes = (0 until vectorSize).toArray
-          new SparseVector(size = vectorSize, indices = indexes, values = featureValues)
-        })).
+        map(accidentToFeatures(featureGenerators)).
         randomSplit(Array(.6, .4), seed = 11L)
 
     val trainData = features(0)
@@ -81,14 +77,36 @@ object AccidentModelGeneration {
 
     val model = logisticRegressionWithLBFGS.run(trainData)
 
-    val precision = testData.map{ point =>
+    val testDataCount = testData.count()
+
+    val testDataPredictions = testData.map{ point =>
       val prediction = model.predict(point.features)
       (point.label, prediction)
-    }.filter{ case (trueLabel, predicted) => trueLabel != predicted}.count() / testData.count.toDouble
+    }
+
+    val tpCount = testDataPredictions.
+      filter{ case (trueLabel, predicted) => trueLabel == predicted}.count().toDouble
+
+    val fnCount = testDataPredictions.
+      filter{ case (trueLabel, predicted) if trueLabel == 1.0 => trueLabel != predicted}.count()
+
+    val precision = tpCount / testDataCount
+    val recall = tpCount / (fnCount + tpCount)
 
     println(s"""Model Precision: $precision""")
+    println(s"""Model Recall: $recall""")
+
+    sc.stop()
   }
+
+  def accidentToFeatures(featureGenerators: Seq[FeatureGenerators])(accident: Accident) = LabeledPoint(ExctractLabel.extract(accident), {
+    val featureValues = featureGenerators.map(f => f.generateFeature(accident)).toArray
+    val vectorSize = featureGenerators.length
+    val indexes = (0 until vectorSize).toArray
+    new SparseVector(size = vectorSize, indices = indexes, values = featureValues)
+  })
 }
+
 
 
 
