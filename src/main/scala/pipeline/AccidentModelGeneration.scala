@@ -35,7 +35,7 @@ import utils.JsonSerialization
   * */
 
 
-object AccidentFeatureGeneration {
+object AccidentModelGeneration {
 
   val logger = Logger.getLogger(getClass)
 
