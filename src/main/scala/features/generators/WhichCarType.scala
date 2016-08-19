@@ -10,6 +10,7 @@ object WhichCarType extends FeatureGenerators {
 
 
 object CarTypeMap {
+  //TODO:Type this
   private val carTypes = Seq(
     "",
     "PASSENGER VEHICLE",
@@ -30,5 +31,5 @@ object CarTypeMap {
     "AMBULANCE"
   )
 
-  val featureMap = carTypes.zipWithIndex.toMap
+  val featureMap = carTypes.zipWithIndex.toMap.mapValues(_.toDouble)
 }

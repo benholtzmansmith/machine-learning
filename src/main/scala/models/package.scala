@@ -1,8 +1,7 @@
 import java.util.Date
 
-import org.joda.time.{TimeOfDay}
+import org.joda.time.TimeOfDay
 import play.api.libs.json._
-
 
 object DateFormat {
   implicit val timeOfDayFormat: Format[TimeOfDay] = new Format[TimeOfDay] {
@@ -24,6 +23,9 @@ object DateFormat {
 }
 
 package object models {
+  import org.cvogt.play.json.implicits.formatSingleton
+  import org.cvogt.play.json.SingletonEncoder.simpleNameUpperCase
+  import org.cvogt.play.json.Jsonx
 
   sealed trait Borough
   case object MANHATTAN extends Borough
@@ -31,6 +33,10 @@ package object models {
   case object QUEENS extends Borough
   case object STATENISLAND extends Borough
   case object BRONX extends Borough
+
+  object Borough {
+    implicit val formatBorough:Format[Borough] = Jsonx.formatSealed[Borough]
+  }
 
   case class ZipCode(code:Int)
 
@@ -40,9 +46,11 @@ package object models {
       def writes(o: ZipCode): JsValue = JsString(o.toString)
 
       def reads(json: JsValue): JsResult[ZipCode] = {
-        case JsString(a) => JsSuccess(ZipCode(a.toInt))
-        case JsNumber(a) => JsSuccess(ZipCode(a.toInt))
-        case _ => JsError("Zip code deserialization error. Field wasn't a string or int"):JsError
+        json match {
+          case JsString(a) => JsSuccess(ZipCode(a.toInt))
+          case JsNumber(a) => JsSuccess(ZipCode(a.toInt))
+          case _ => JsError("Zip code deserialization error. Field wasn't a string or int"):JsError
+        }
       }
     }
   }
