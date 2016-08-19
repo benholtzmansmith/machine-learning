@@ -1,6 +1,6 @@
 package features
 
-import features.generators.{WasAtNight, WhichBorough, WhichCarType}
+import features.generators._
 import models.Accident
 
 trait FeatureGenerators {
@@ -10,6 +10,9 @@ object FeatureGenerators {
   val featureGenerators:Seq[FeatureGenerators] = Seq(
     WhichCarType,
     WasAtNight,
-    WhichBorough
+    WhichBorough,
+    HowManyMotoristsInjured,
+    HowManyCyclistsInjured,
+    HowManyPedestriansInjured
   )
 }
