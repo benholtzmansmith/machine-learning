@@ -33,9 +33,10 @@ package object models {
   case object QUEENS extends Borough
   case object STATENISLAND extends Borough
   case object BRONX extends Borough
+  case object EMPTY extends Borough
 
   object Borough {
-    implicit val formatBorough:Format[Borough] = Jsonx.formatSealed[Borough]
+    implicit val formatBorough:Format[Borough] = Jsonx.formatSealedWithFallback[Borough, models.EMPTY.type ]
   }
 
   case class ZipCode(code:Int)
@@ -57,9 +58,7 @@ package object models {
 
   case class Accident(
                        time: TimeOfDay,
-                       private val borough: String,
-                       boroughTyped:Borough,
-                       zipeCode: ZipCode,
+                       borough:Borough,
                        location: String,
                        onStreetName: String,
                        offStreetName: String,

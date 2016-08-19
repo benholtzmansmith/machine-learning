@@ -8,9 +8,9 @@ import features.FeatureGenerators.featureGenerators
 import models.Accident
 import org.apache.hadoop.conf.Configuration
 import org.apache.log4j.Logger
-import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
+import org.apache.spark.mllib.classification.{LogisticRegressionWithLBFGS, SVMWithSGD}
 import org.apache.spark.mllib.linalg.SparseVector
-import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.regression.{GeneralizedLinearModel, LabeledPoint}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.bson.BSONObject
@@ -53,48 +53,29 @@ object AccidentModelGeneration {
     //Hard coded for now to just point to a local mongo instance
     MongoConfigUtil.setInputURI(config, "mongodb://localhost:27017/accidents.accidents")
 
-    val features =
-      sc.
-        newAPIHadoopRDD(config, classOf[MongoInputFormat], classOf[Object], classOf[BSONObject] ).
-        asInstanceOf[RDD[( ObjectId, DBObject )]].
-        flatMap{ case (objId, dbObj) => {
-          JsonSerialization.deserialize[Accident](dbObj) match {
-            case JsSuccess(a, _) =>
-              Some(a)
-            case JsError(e) =>
-              println(s"Error deserializing accident data:$e")
-              None
-          }
-        } }.
-        map(accidentToFeatures(featureGenerators)).
-        randomSplit(Array(.6, .4), seed = 11L)
+    val features = loadData(sc, config)
 
-    val trainData = features(0)
-
-    val testData = features(1)
+    val (trainData, testData) = (features(0), features(1))
 
     val logisticRegressionWithLBFGS = new LogisticRegressionWithLBFGS
 
-    val model = logisticRegressionWithLBFGS.run(trainData)
+    val logisticRegressionModel = logisticRegressionWithLBFGS.run(trainData)
 
-    val testDataCount = testData.count()
+    val libSVM = SVMWithSGD.train(trainData, 100)
 
-    val testDataPredictions = testData.map{ point =>
-      val prediction = model.predict(point.features)
-      (point.label, prediction)
-    }
+    val libSVMperformance = testPerformance(libSVM, testData)
 
-    val tpCount = testDataPredictions.
-      filter{ case (trueLabel, predicted) => trueLabel == predicted}.count().toDouble
+    val logisticRegressionPerformance = testPerformance(logisticRegressionModel, testData)
 
-    val fnCount = testDataPredictions.
-      filter{ case (trueLabel, predicted) if trueLabel == 1.0 => trueLabel != predicted}.count()
-
-    val precision = tpCount / testDataCount
-    val recall = tpCount / (fnCount + tpCount)
-
-    println(s"""Model Precision: $precision""")
-    println(s"""Model Recall: $recall""")
+    println(
+      s"""
+         |Lib svm precision: ${libSVMperformance.precision}
+         |Lib svm recall: ${libSVMperformance.recall}
+         |
+         |Logistic regression precision: ${logisticRegressionPerformance.precision}
+         |Logistic regression recall: ${logisticRegressionPerformance.recall}
+         |
+         |""".stripMargin)
 
     sc.stop()
   }
@@ -105,8 +86,47 @@ object AccidentModelGeneration {
     val indexes = (0 until vectorSize).toArray
     new SparseVector(size = vectorSize, indices = indexes, values = featureValues)
   })
+
+
+  def loadData(sc:SparkContext, config:Configuration) = {
+    sc.
+      newAPIHadoopRDD(config, classOf[MongoInputFormat], classOf[Object], classOf[BSONObject] ).
+      asInstanceOf[RDD[( ObjectId, DBObject )]].
+      flatMap{ case (objId, dbObj) => {
+        JsonSerialization.deserialize[Accident](dbObj) match {
+          case JsSuccess(a, _) =>
+            Some(a)
+          case JsError(e) =>
+            println(s"Error deserializing accident data:$e")
+            None
+        }
+      } }.
+      map(accidentToFeatures(featureGenerators)).
+      randomSplit(Array(.6, .4), seed = 11L)
+  }
+
+  def testPerformance(model: GeneralizedLinearModel, testData:RDD[LabeledPoint]):ModelPerformance = {
+    val modelPredictions = testData.map{ point =>
+      val prediction = model.predict(point.features)
+      (point.label, prediction)
+    }
+    val testDataCount = testData.count()
+
+    val tpCount = modelPredictions.
+      filter{ case (trueLabel, predicted) => trueLabel == predicted}.count().toDouble
+
+    val fnCount = modelPredictions.
+      filter{ case (trueLabel, predicted) if trueLabel == 1.0 => trueLabel != predicted}.count()
+
+    val precision = tpCount / testDataCount
+    val recall = tpCount / (fnCount + tpCount)
+
+    ModelPerformance(precision = precision, recall = recall)
+  }
 }
 
+
+case class ModelPerformance(precision:Double, recall:Double)
 
 
 
