@@ -24,7 +24,7 @@ object DateFormat {
 
 package object models {
   import org.cvogt.play.json.implicits.formatSingleton
-  import org.cvogt.play.json.SingletonEncoder.simpleNameUpperCase
+  import org.cvogt.play.json.SingletonEncoder.simpleName
   import org.cvogt.play.json.Jsonx
 
   sealed trait Borough
@@ -33,10 +33,11 @@ package object models {
   case object QUEENS extends Borough
   case object STATENISLAND extends Borough
   case object BRONX extends Borough
-  case object EMPTY extends Borough
 
   object Borough {
-    implicit val formatBorough:Format[Borough] = Jsonx.formatSealedWithFallback[Borough, models.EMPTY.type ]
+    final case class Unknown( private[models]json:  JsValue ) extends Borough
+    implicit lazy val FormatBoroughUnknown: Format[Unknown] = Jsonx.formatInline[Unknown]
+    implicit val formatBorough:Format[Borough] = Jsonx.formatSealedWithFallback[Borough, Unknown ]
   }
 
   case class ZipCode(code:Int)
