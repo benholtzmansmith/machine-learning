@@ -63,9 +63,11 @@ object AccidentModelGeneration {
 
     val libSVM = SVMWithSGD.train(trainData, 100)
 
-    val libSVMperformance = testPerformance(libSVM, testData)
+    val testDataCount = testData.count()
 
-    val logisticRegressionPerformance = testPerformance(logisticRegressionModel, testData)
+    val libSVMperformance = testPerformance(libSVM, testData, testDataCount)
+
+    val logisticRegressionPerformance = testPerformance(logisticRegressionModel, testData, testDataCount)
 
     println(
       s"""
@@ -105,18 +107,18 @@ object AccidentModelGeneration {
       randomSplit(Array(.6, .4), seed = 11L)
   }
 
-  def testPerformance(model: GeneralizedLinearModel, testData:RDD[LabeledPoint]):ModelPerformance = {
+  def testPerformance(model: GeneralizedLinearModel, testData:RDD[LabeledPoint], testDataCount:Long):ModelPerformance = {
     val modelPredictions = testData.map{ point =>
       val prediction = model.predict(point.features)
       (point.label, prediction)
     }
-    val testDataCount = testData.count()
 
-    val tpCount = modelPredictions.
-      filter{ case (trueLabel, predicted) => trueLabel == predicted}.count().toDouble
-
-    val fnCount = modelPredictions.
-      filter{ case (trueLabel, predicted) if trueLabel == 1.0 => trueLabel != predicted}.count()
+    val (tpCount, fnCount) = modelPredictions.fold(0,0){
+      case ((truePositiveCount, falseNegativeCount), (trueLabel, predicted)) =>
+        if (trueLabel == predicted) (truePositiveCount + 1, falseNegativeCount)
+        else if (trueLabel == 1 && trueLabel != predicted) (truePositiveCount, falseNegativeCount + 1)
+        else (truePositiveCount, falseNegativeCount)
+    }
 
     val precision = tpCount / testDataCount
     val recall = tpCount / (fnCount + tpCount)
@@ -124,7 +126,6 @@ object AccidentModelGeneration {
     ModelPerformance(precision = precision, recall = recall)
   }
 }
-
 
 case class ModelPerformance(precision:Double, recall:Double)
 
