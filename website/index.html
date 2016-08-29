@@ -3,6 +3,7 @@
 	<head>
 		<title> Machine Learning </title>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<script src="js/angular/machineLearningApp.js"> </script>
 		<link rel="stylesheet" type="text/css" href="css/index.css">
@@ -14,7 +15,10 @@
 			<h1 class="title"> Machine Learning </h1>
 		</div>
 		<div ng-controller="TrainingController">
-	 		<button class="btn btn-danger" ng-click="train"> Make Magic Happen </button>
+	 		<button class="btn btn-danger" ng-click="train()"> Make Magic Happen </button>
+	 		<div>
+	 			{{result}}
+	 		</div>
 		</div>
 	</body>
 </html>
