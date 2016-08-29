@@ -1,6 +1,6 @@
 # machine-learning
 
-<b> Running Application <b>
+<b> Running Application </b>
 
 Run `node website/server.js` in the root director of the project
 
