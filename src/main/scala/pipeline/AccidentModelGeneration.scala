@@ -113,21 +113,22 @@ object AccidentModelGeneration {
       (point.label, prediction)
     }
 
-    val (tpCount, fnCount) = modelPredictions.fold(0,0){
-      case ((truePositiveCount, falseNegativeCount), (trueLabel, predicted)) =>
-        if (trueLabel == predicted) (truePositiveCount + 1, falseNegativeCount)
-        else if (trueLabel == 1 && trueLabel != predicted) (truePositiveCount, falseNegativeCount + 1)
-        else (truePositiveCount, falseNegativeCount)
-    }
+    val (tpCount, fnCount, allOthers) = modelPredictions.aggregate(0,0,0)({
+      case ((truePositiveCount, falseNegativeCount, allOthers), (trueLabel, predicted)) =>
+        if (trueLabel == predicted) (truePositiveCount + 1, falseNegativeCount, allOthers)
+        else if (trueLabel == 1 && trueLabel != predicted) (truePositiveCount, falseNegativeCount + 1, allOthers)
+        else (truePositiveCount, falseNegativeCount, allOthers + 1)
+    }, {case ((tp1, fn1, others1), (tp2, fn2, others2)) => (tp1+tp2, fn1+fn2, others1 + others2)})
 
     val precision = tpCount / testDataCount
     val recall = tpCount / (fnCount + tpCount)
+    val others = allOthers / testDataCount
 
-    ModelPerformance(precision = precision, recall = recall)
+    ModelPerformance(precision = precision, recall = recall, others = others)
   }
 }
 
-case class ModelPerformance(precision:Double, recall:Double)
+case class ModelPerformance(precision:Double, recall:Double, others:Double)
 
 
 
