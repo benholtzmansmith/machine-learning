@@ -5,20 +5,21 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-		<script src="js/angular/machineLearningApp.js"> </script>
-		<link rel="stylesheet" type="text/css" href="css/index.css">
+		<script src="js/src/machineLearningApp.js"> </script>
+		<link rel="stylesheet" type="text/css" href="css/src/index.css">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
+		<link rel='stylesheet' href='css/build/loading-bar.min.css' type='text/css' media='all' />
+		 <script type='text/javascript' src='js/build/loading-bar.min.js'></script>
 	</head>
-	<body id="body">
+	<body id="body" ng-controller="TrainingController">
 		<div>
 			<h1 class="title"> Machine Learning </h1>
 		</div>
-		<div ng-controller="TrainingController">
+		<div>
 	 		<button class="btn btn-danger" ng-click="train()"> Make Magic Happen </button>
-	 		<div>
-	 			{{result}}
-	 		</div>
+		</div>
+		<div>
+			{{result}}
 		</div>
 	</body>
 </html>

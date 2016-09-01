@@ -8,7 +8,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/train', function (req, res){
-	res.send(200)
+	setTimeout(function(){res.sendStatus(200)}, 5000)
 })
 
 app.listen(3000, function () {
