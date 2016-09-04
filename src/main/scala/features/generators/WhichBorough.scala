@@ -3,7 +3,7 @@ package features.generators
 import features.FeatureGenerators
 import models._
 
-object WhichBorough extends FeatureGenerators{
+object WhichBorough extends FeatureGenerators {
   def generateFeature(accident: Accident): Double = {
     accident.borough match {
       case MANHATTAN => 1.0

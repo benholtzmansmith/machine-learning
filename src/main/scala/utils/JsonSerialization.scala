@@ -1,9 +1,9 @@
 package utils
 
 import com.mongodb.DBObject
-import play.api.libs.json.{JsError, JsResult, Json, Reads}
+import play.api.libs.json.{ JsError, JsResult, Json, Reads }
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object JsonSerialization {
   def deserialize[T: Reads](dbo: DBObject): JsResult[T] = {

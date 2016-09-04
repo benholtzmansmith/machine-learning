@@ -8,7 +8,6 @@ object WhichCarType extends FeatureGenerators {
     CarTypeMap.featureMap.getOrElse(accident.vehicleTypeCode1, 999)
 }
 
-
 object CarTypeMap {
   //TODO:Type this
   private val carTypes = Seq(
