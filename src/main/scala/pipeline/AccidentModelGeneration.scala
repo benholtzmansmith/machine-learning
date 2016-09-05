@@ -3,7 +3,7 @@ package pipeline
 import com.mongodb.DBObject
 import com.mongodb.hadoop.MongoInputFormat
 import com.mongodb.hadoop.util.MongoConfigUtil
-import features.{ ExctractLabel, FeatureGenerators }
+import features.{ ExtractLabel, FeatureGenerators }
 import features.FeatureGenerators.featureGenerators
 import models.Accident
 import org.apache.hadoop.conf.Configuration
@@ -81,7 +81,7 @@ object AccidentModelGeneration {
     sc.stop()
   }
 
-  def accidentToFeatures(featureGenerators: Seq[FeatureGenerators])(accident: Accident) = LabeledPoint(ExctractLabel.extract(accident), {
+  def accidentToFeatures(featureGenerators: Seq[FeatureGenerators])(accident: Accident) = LabeledPoint(ExtractLabel.extract(accident), {
     val featureValues = featureGenerators.map(f => f.generateFeature(accident)).toArray
     val vectorSize = featureGenerators.length
     val indexes = (0 until vectorSize).toArray
