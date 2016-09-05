@@ -1,4 +1,6 @@
-accident*
+*.gz
+*.json
+*.csv
 .idea
 project
 target
