@@ -78,6 +78,10 @@ object AccidentModelGeneration {
          |""".stripMargin
     )
 
+    libSVM.save(sc, ".")
+
+    logisticRegressionModel.save(sc, ".")
+
     sc.stop()
   }
 
