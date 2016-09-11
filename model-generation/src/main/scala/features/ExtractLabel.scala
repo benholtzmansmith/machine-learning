@@ -1,6 +1,6 @@
 package features
 
-import models.Accident
+import machineLearning.data.models.Accident
 
 object ExtractLabel {
   def extract(accident: Accident): Double = {

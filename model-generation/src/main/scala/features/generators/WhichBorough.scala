@@ -1,7 +1,7 @@
 package features.generators
 
 import features.FeatureGenerators
-import models._
+import machineLearning.data.models._
 
 object WhichBorough extends FeatureGenerators {
   def generateFeature(accident: Accident): Double = {

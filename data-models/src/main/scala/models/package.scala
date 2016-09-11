@@ -1,3 +1,5 @@
+package machineLearning.data
+
 import java.util.Date
 
 import org.joda.time.TimeOfDay
@@ -82,4 +84,17 @@ package object models {
     import DateFormat._
     implicit val format: Format[Accident] = Json.format[Accident]
   }
+
+  case class ModelPrediction(
+    accidentId: AccidentId,
+    prediction: Prediction,
+    confidence: Confidence
+  )
+
+  case class AccidentId(string: String)
+
+  case class Prediction(value: Double)
+
+  case class Confidence(value: Double)
+
 }

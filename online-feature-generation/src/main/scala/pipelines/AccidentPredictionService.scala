@@ -1,10 +1,8 @@
 package pipelines
 
-import models.Accident
-import features.FeatureGenerators.featureGenerators
-
-import scala.concurrent.{ Await, Future }
+import machineLearning.data.models.{ Accident, ModelPrediction }
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.{ Await, Future }
 
 /**
  * Created by benjaminsmith on 9/5/16.
@@ -20,7 +18,7 @@ object AccidentPredictionService {
     /**
      * Generate online features
      */
-    val features: Seq[Double] = featureGenerators.map(_.generateFeature(someAccidentData))
+    val features: Seq[Double] = ???
 
     /**
      * Pass features to thrift service to make model prediction
@@ -36,15 +34,3 @@ object AccidentPredictionService {
 
   def doSomethingWithPrediction(modelPrediction: ModelPrediction): Unit = ???
 }
-
-case class ModelPrediction(
-  accidentId: AccidentId,
-  prediction: Prediction,
-  confidence: Confidence
-)
-
-case class AccidentId(string: String)
-
-case class Prediction(value: Double)
-
-case class Confidence(value: Double)

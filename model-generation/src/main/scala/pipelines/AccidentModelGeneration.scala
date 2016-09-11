@@ -5,7 +5,7 @@ import com.mongodb.hadoop.MongoInputFormat
 import com.mongodb.hadoop.util.MongoConfigUtil
 import features.{ ExtractLabel, FeatureGenerators }
 import features.FeatureGenerators.featureGenerators
-import models.Accident
+import machineLearning.data.models.Accident
 import org.apache.hadoop.conf.Configuration
 import org.apache.log4j.Logger
 import org.apache.spark.mllib.classification.{ LogisticRegressionWithLBFGS, SVMWithSGD }
@@ -78,9 +78,9 @@ object AccidentModelGeneration {
          |""".stripMargin
     )
 
-    libSVM.save(sc, "./libSVM.model")
+    libSVM.save(sc, "/target/tmp/libSVM")
 
-    logisticRegressionModel.save(sc, "./logisticRegression.model")
+    logisticRegressionModel.save(sc, "/target/tmp/logisticRegression")
 
     sc.stop()
   }

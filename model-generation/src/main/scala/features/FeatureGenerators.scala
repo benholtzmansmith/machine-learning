@@ -1,7 +1,7 @@
 package features
 
 import features.generators._
-import models.Accident
+import machineLearning.data.models.Accident
 
 trait FeatureGenerators {
   def generateFeature(accident: Accident): Double

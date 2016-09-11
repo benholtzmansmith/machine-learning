@@ -1,7 +1,7 @@
 package features.generators
 
 import features.FeatureGenerators
-import models.Accident
+import machineLearning.data.models.Accident
 import org.joda.time.TimeOfDay
 
 object WasAtNight extends FeatureGenerators {
