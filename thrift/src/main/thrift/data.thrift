@@ -1,4 +1,4 @@
-namespace java com.machineLearning.ml.thrift
+namespace java com.machineLearning.thrift
 
 
 struct FeatureKey {
@@ -17,5 +17,9 @@ struct FeatureKV {
 
 struct FeatureDict {
   1: required list<FeatureKV> values;
+}
+
+struct Prediction {
+  1: required double probability;
 }
 

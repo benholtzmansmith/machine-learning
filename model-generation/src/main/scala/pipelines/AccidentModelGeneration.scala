@@ -8,7 +8,7 @@ import features.FeatureGenerators.featureGenerators
 import machineLearning.data.models.Accident
 import org.apache.hadoop.conf.Configuration
 import org.apache.log4j.Logger
-import org.apache.spark.mllib.classification.{ LogisticRegressionWithLBFGS, SVMWithSGD }
+import org.apache.spark.mllib.classification.{ LogisticRegressionModel, LogisticRegressionWithLBFGS, SVMWithSGD }
 import org.apache.spark.mllib.linalg.SparseVector
 import org.apache.spark.mllib.regression.{ GeneralizedLinearModel, LabeledPoint }
 import org.apache.spark.rdd.RDD
@@ -18,21 +18,6 @@ import org.bson.types.ObjectId
 import org.scalatest.TestData
 import play.api.libs.json.{ JsError, JsSuccess }
 import utils.JsonSerialization
-
-/**
- *
- * Spark job to analyze new york accident data.
- *
- * To run this:
- * (1) curl https://nycopendata.socrata.com/api/views/h9gi-nx95/rows.csv >> accident.csv
- * (2) mongo import csv to local mongo instance
- * (3) rename fields to match the case class names
- * (3) Run job :-)
- *
- * Current precision of model: 98%
- * Recall is probably pretty shit but haven't checked.
- *
- */
 
 object AccidentModelGeneration {
 
@@ -57,7 +42,7 @@ object AccidentModelGeneration {
 
     val logisticRegressionWithLBFGS = new LogisticRegressionWithLBFGS
 
-    val logisticRegressionModel = logisticRegressionWithLBFGS.run(trainData)
+    val logisticRegressionModel: LogisticRegressionModel = logisticRegressionWithLBFGS.run(trainData)
 
     val libSVM = SVMWithSGD.train(trainData, 100)
 

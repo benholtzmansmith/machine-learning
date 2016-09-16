@@ -1,8 +1,11 @@
 package pipelines
 
+import com.twitter.finagle.Thrift
 import machineLearning.data.models.{ Accident, ModelPrediction }
+
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{ Await, Future }
+import com.machineLearning.thrift._
+import com.twitter.util.{ Await, Duration, Future => TwitterFuture }
 
 /**
  * Created by benjaminsmith on 9/5/16.
@@ -18,19 +21,23 @@ object AccidentPredictionService {
     /**
      * Generate online features
      */
-    val features: Seq[Double] = ???
+    val features: FeatureDict = ???
 
     /**
      * Pass features to thrift service to make model prediction
      */
-    val predictionFut: Future[ModelPrediction] = ???
 
-    val predictionTimeout = 1.minute
+    val predictor = Thrift.newServiceIface[PredictorService[TwitterFuture]]("localhost:9090")
 
-    val prediction: ModelPrediction = Await.result(predictionFut, predictionTimeout)
+    val predictionFut: TwitterFuture[Prediction] = predictor.predict(features)
+
+    val predictionTimeout = new Duration(6 * 10 ^ 10)
+
+    val prediction: Prediction = Await.result(predictionFut, predictionTimeout)
 
     doSomethingWithPrediction(prediction)
+
   }
 
-  def doSomethingWithPrediction(modelPrediction: ModelPrediction): Unit = ???
+  def doSomethingWithPrediction(modelPrediction: Prediction): Unit = ???
 }
